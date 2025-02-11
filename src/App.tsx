@@ -1,18 +1,18 @@
 import { useState, useEffect } from "react";
-import './App.css'
+import "./App.css";
 
 type Filter = {
   uiType: string;
   name: string;
   id: number;
-  value: string | null;  // value может быть либо строкой, либо null
+  value: string | null;
   availableValues: { id: number; value: string }[];
 };
 
 function App() {
   const defaultFilters: Filter[] = [
     {
-      uiType: "SelectList", 
+      uiType: "SelectList",
       name: "Citizenship",
       id: 1,
       value: null,
@@ -20,12 +20,12 @@ function App() {
         { id: 1, value: "US Citizen / Permanent Resident" },
         { id: 2, value: "Non-Permanent Resident" },
         { id: 3, value: "Foreign national" },
-        { id: 727, value: "ITIN" }
-      ]
+        { id: 727, value: "ITIN" },
+      ],
     },
     {
-      uiType: "SelectList", 
-      name: "Income Type", 
+      uiType: "SelectList",
+      name: "Income Type",
       id: 2,
       value: null,
       availableValues: [
@@ -41,29 +41,33 @@ function App() {
         { id: 167, value: "1099" },
         { id: 502, value: "DSCR 0.75-0.99" },
         { id: 503, value: "DSCR < 0.75" },
-        { id: 857, value: "DSCR >= 1.25" }
-      ]
+        { id: 857, value: "DSCR >= 1.25" },
+      ],
     },
-    // Добавьте другие фильтры по аналогии
   ];
 
   const [filters, setFilters] = useState<Filter[]>(defaultFilters);
-  const [buttonState, setButtonState] = useState([false, false, false]); // Состояние кнопок
+  const [buttonState, setButtonState] = useState([false, false, false]);
+  const [savedScenarios, setSavedScenarios] = useState<(Filter[] | null)[]>([null, null, null]);
 
   useEffect(() => {
-    // Проверка наличия сохраненных сценариев при загрузке страницы
     [1, 2, 3].forEach((scenarioId) => {
-      if (localStorage.getItem(`scenario_${scenarioId}`)) {
+      const savedScenario = localStorage.getItem(`scenario_${scenarioId}`);
+      if (savedScenario) {
         setButtonState((prev) => {
           const newState = [...prev];
-          newState[scenarioId - 1] = true; // Меняем состояние кнопки на "Показать"
+          newState[scenarioId - 1] = true;
+          return newState;
+        });
+        setSavedScenarios((prev) => {
+          const newState = [...prev];
+          newState[scenarioId - 1] = JSON.parse(savedScenario);
           return newState;
         });
       }
     });
   }, []);
 
-  // Функция обновления значения фильтра
   const handleFilterChange = (id: number, selectedValue: string) => {
     setFilters((prevFilters) =>
       prevFilters.map((filter) =>
@@ -72,17 +76,20 @@ function App() {
     );
   };
 
-  // Функция сохранения сценария в LocalStorage
   const saveScenario = (scenarioId: number) => {
     localStorage.setItem(`scenario_${scenarioId}`, JSON.stringify(filters));
     setButtonState((prev) => {
       const newState = [...prev];
-      newState[scenarioId - 1] = true; // Меняем состояние кнопки на "Показать"
+      newState[scenarioId - 1] = true;
+      return newState;
+    });
+    setSavedScenarios((prev) => {
+      const newState = [...prev];
+      newState[scenarioId - 1] = filters;
       return newState;
     });
   };
 
-  // Функция загрузки сценария из LocalStorage
   const loadScenario = (scenarioId: number) => {
     const savedScenario = localStorage.getItem(`scenario_${scenarioId}`);
     if (savedScenario) {
@@ -90,12 +97,12 @@ function App() {
     }
   };
 
-  // Функция очистки всех сценариев
   const clearScenarios = () => {
     localStorage.removeItem("scenario_1");
     localStorage.removeItem("scenario_2");
     localStorage.removeItem("scenario_3");
     setButtonState([false, false, false]);
+    setSavedScenarios([null, null, null]);
     setFilters(defaultFilters);
   };
 
@@ -103,7 +110,6 @@ function App() {
     <div className="app-container">
       <h2>Mortgage Calculator</h2>
       <div className="filters">
-        {/* Отрисовка фильтров */}
         {filters.map((filter) => (
           <div key={filter.id} className="filter-item">
             <label>{filter.name}:</label>
@@ -122,26 +128,30 @@ function App() {
         ))}
       </div>
 
-      {/* Кнопки сохранения/показа сценариев */}
       <div className="button-group">
         {[1, 2, 3].map((scenarioId) => (
-          <button
-            key={scenarioId}
-            onClick={() =>
-              buttonState[scenarioId - 1]
-                ? loadScenario(scenarioId)
-                : saveScenario(scenarioId)
-            }
-            className={ buttonState[scenarioId - 1] ? "scenario-button_active" : "scenario-button"}
-          >
-            {buttonState[scenarioId - 1]
-              ? `Show scenario ${scenarioId}`
-              : `Save scenario ${scenarioId}`}
-          </button>
+          <div key={scenarioId} className="scenario-container">
+            <button
+              onClick={() =>
+                buttonState[scenarioId - 1]
+                  ? loadScenario(scenarioId)
+                  : saveScenario(scenarioId)
+              }
+              className={buttonState[scenarioId - 1] ? "scenario-button_active" : "scenario-button"}
+            >
+              {buttonState[scenarioId - 1] ? `Show scenario ${scenarioId}` : `Save scenario ${scenarioId}`}
+            </button>
+            {savedScenarios[scenarioId - 1] && (
+              <ul className="saved-values">
+                {savedScenarios[scenarioId - 1]?.map((filter) =>
+                  filter.value ? <li key={filter.id}>{filter.value}</li> : null
+                )}
+              </ul>
+            )}
+          </div>
         ))}
       </div>
 
-      {/* Кнопка для очистки сценариев */}
       <div className="clear-button-container">
         <button onClick={clearScenarios} className="clear-scenarios-button">
           Clear scenarios
