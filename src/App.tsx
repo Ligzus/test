@@ -6,7 +6,7 @@ type Filter = {
   name: string;
   id: number;
   value: string | null;
-  availableValues: { id: number; value: string }[];
+  availableValues?: { id: number; value: string }[];
 };
 
 function App() {
@@ -43,6 +43,12 @@ function App() {
         { id: 503, value: "DSCR < 0.75" },
         { id: 857, value: "DSCR >= 1.25" },
       ],
+    },
+    {
+      uiType: "Range",
+      name: "Loan Amount",
+      id: 3,
+      value: "500000", // Значение по умолчанию
     },
   ];
 
@@ -113,17 +119,30 @@ function App() {
         {filters.map((filter) => (
           <div key={filter.id} className="filter-item">
             <label>{filter.name}:</label>
-            <select
-              value={filter.value || ""}
-              onChange={(e) => handleFilterChange(filter.id, e.target.value)}
-            >
-              <option value="">Select an option</option>
-              {filter.availableValues.map((option) => (
-                <option key={option.id} value={option.value}>
-                  {option.value}
-                </option>
-              ))}
-            </select>
+            {filter.uiType === "SelectList" && (
+              <select
+                value={filter.value || ""}
+                onChange={(e) => handleFilterChange(filter.id, e.target.value)}
+              >
+                <option value="">Select an option</option>
+                {filter.availableValues?.map((option) => (
+                  <option key={option.id} value={option.value}>
+                    {option.value}
+                  </option>
+                ))}
+              </select>
+            )}
+            {filter.uiType === "Range" && (
+              <input
+                type="range"
+                min="50000"
+                max="2000000"
+                step="5000"
+                value={filter.value || "500000"}
+                onChange={(e) => handleFilterChange(filter.id, e.target.value)}
+              />
+            )}
+            {filter.uiType === "Range" && <span>{filter.value}</span>}
           </div>
         ))}
       </div>
@@ -144,7 +163,7 @@ function App() {
             {savedScenarios[scenarioId - 1] && (
               <ul className="saved-values">
                 {savedScenarios[scenarioId - 1]?.map((filter) =>
-                  filter.value ? <li key={filter.id}>{filter.value}</li> : null
+                  filter.value ? <li key={filter.id}>{filter.name}: {filter.value}</li> : null
                 )}
               </ul>
             )}
