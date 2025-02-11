@@ -87,13 +87,24 @@ h2 {
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  background-color: #007bff;
+  background-color: #033d7c;
+  color: white;
+  transition: background-color 0.3s ease;
+}
+
+.scenario-button_active {
+  padding: 10px 20px;
+  font-size: 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  background-color: #458d42;
   color: white;
   transition: background-color 0.3s ease;
 }
 
 .scenario-button:hover {
-  background-color: #0056b3;
+  background-color: #066bd6;
 }
 
 /* Кнопка очистки */

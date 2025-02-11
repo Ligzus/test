@@ -132,11 +132,11 @@ function App() {
                 ? loadScenario(scenarioId)
                 : saveScenario(scenarioId)
             }
-            className="scenario-button"
+            className={ buttonState[scenarioId - 1] ? "scenario-button_active" : "scenario-button"}
           >
             {buttonState[scenarioId - 1]
-              ? `Показать сценарий ${scenarioId}`
-              : `Сохранить сценарий ${scenarioId}`}
+              ? `Show scenario ${scenarioId}`
+              : `Save scenario ${scenarioId}`}
           </button>
         ))}
       </div>
@@ -144,7 +144,7 @@ function App() {
       {/* Кнопка для очистки сценариев */}
       <div className="clear-button-container">
         <button onClick={clearScenarios} className="clear-scenarios-button">
-          Очистить сценарии
+          Clear scenarios
         </button>
       </div>
     </div>
