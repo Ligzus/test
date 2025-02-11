@@ -128,3 +128,8 @@ h2 {
 .clear-scenarios-button:hover {
   background-color: #c82333;
 }
+
+.saved-values {
+  font-size: 12px;
+  text-align: left;
+}
