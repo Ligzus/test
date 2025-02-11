@@ -48,7 +48,7 @@ function App() {
       uiType: "Range",
       name: "Loan Amount",
       id: 3,
-      value: "500000", // Значение по умолчанию
+      value: "500000",
     },
   ];
 
@@ -103,13 +103,18 @@ function App() {
     }
   };
 
-  const clearScenarios = () => {
-    localStorage.removeItem("scenario_1");
-    localStorage.removeItem("scenario_2");
-    localStorage.removeItem("scenario_3");
-    setButtonState([false, false, false]);
-    setSavedScenarios([null, null, null]);
-    setFilters(defaultFilters);
+  const clearScenario = (scenarioId: number) => {
+    localStorage.removeItem(`scenario_${scenarioId}`);
+    setButtonState((prev) => {
+      const newState = [...prev];
+      newState[scenarioId - 1] = false;
+      return newState;
+    });
+    setSavedScenarios((prev) => {
+      const newState = [...prev];
+      newState[scenarioId - 1] = null;
+      return newState;
+    });
   };
 
   return (
@@ -160,10 +165,21 @@ function App() {
             >
               {buttonState[scenarioId - 1] ? `Show scenario ${scenarioId}` : `Save scenario ${scenarioId}`}
             </button>
+
+            {/* Условие для отображения кнопки очистки */}
+            {savedScenarios[scenarioId - 1] && savedScenarios[scenarioId - 1] !== null && (
+              <button
+                onClick={() => clearScenario(scenarioId)}
+                className="clear-scenario-button"
+              >
+                ✖
+              </button>
+            )}
+
             {savedScenarios[scenarioId - 1] && (
               <ul className="saved-values">
                 {savedScenarios[scenarioId - 1]?.map((filter) =>
-                  filter.value ? <li key={filter.id}>{filter.name}: {filter.value}</li> : null
+                  filter.value ? <li key={filter.id}>{filter.value}</li> : null
                 )}
               </ul>
             )}
@@ -171,11 +187,38 @@ function App() {
         ))}
       </div>
 
-      <div className="clear-button-container">
-        <button onClick={clearScenarios} className="clear-scenarios-button">
-          Clear scenarios
-        </button>
+      <div className="button-group_1">
+        <h2>Alternative display of saved scenarios</h2>
+        {[1, 2, 3].map((scenarioId) => (
+          <div key={scenarioId} className="scenario-container">
+            <button
+              onClick={() =>
+                buttonState[scenarioId - 1]
+                  ? loadScenario(scenarioId)
+                  : saveScenario(scenarioId)
+              }
+              className={buttonState[scenarioId - 1] ? "scenario-button_active_1" : "scenario-button_1"}
+            >
+              {buttonState[scenarioId - 1] && savedScenarios[scenarioId - 1]
+                ? savedScenarios[scenarioId - 1]!.filter((filter) => filter.value)
+                  .map((filter) => filter.value)
+                  .join(", ")
+                : `Save scenario ${scenarioId}`}
+            </button>
+
+            {savedScenarios[scenarioId - 1] && savedScenarios[scenarioId - 1] !== null && (
+              <button
+                onClick={() => clearScenario(scenarioId)}
+                className="clear-scenario-button"
+              >
+                ✖
+              </button>
+            )}
+          </div>
+        ))}
       </div>
+
+
     </div>
   );
 }
